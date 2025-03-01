@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Task ...
+// Task
 type Task struct {
 	ID           string   `json:"id"`
 	Description  string   `json:"description"`
@@ -51,11 +51,9 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.WriteHeader(http.StatusOK)
 
 	w.Write(resp)
-
 }
 
 func postTasks(w http.ResponseWriter, r *http.Request) {
@@ -74,9 +72,7 @@ func postTasks(w http.ResponseWriter, r *http.Request) {
 	tasks[task.ID] = task
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.WriteHeader(http.StatusCreated)
-
 }
 
 func getTask(w http.ResponseWriter, r *http.Request) {
@@ -92,16 +88,27 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		http.Error(w, "Task was not found.", http.StatusBadRequest)
+		http.Error(w, "The task was not found.", http.StatusBadRequest)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	w.WriteHeader(http.StatusOK)
 
 	w.Write(resp)
+}
 
+func deleteTask(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	if _, ok := tasks[id]; ok {
+		delete(tasks, id)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Error(w, "The task to be removed was not found.", http.StatusBadRequest)
 }
 
 func main() {
@@ -111,7 +118,7 @@ func main() {
 	r.Get("/tasks", getTasks)
 	r.Post("/tasks", postTasks)
 	r.Get("/tasks/{id}", getTask)
-	// r.Delete("/tasks/{id}", deleteTask)
+	r.Delete("/tasks/{id}", deleteTask)
 
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		fmt.Printf("Ошибка при запуске сервера: %s", err.Error())
